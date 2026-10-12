@@ -2,11 +2,13 @@ import './project-tmp.mjs';
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
 import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { ROOT, run, ffprobeJson, writeJson } from './media.mjs';
 import { assertProjectOutput } from './project-paths.mjs';
 import { checkedPath, fileSnapshot, digest } from './job-paths.mjs';
 import { withOutputTransaction } from './delivery.mjs';
 import { displayGeometry, outputGeometry, planReframe, cropCommands, trackingSettings } from './reframe-core.mjs';
+import { mediaToolPath, selectRuntime } from './platform-runtime.mjs';
 
 const relative = (file) => path.relative(ROOT, file).split(path.sep).join('/');
 const fraction = (value) => { const [n, d] = String(value ?? '0/1').split('/').map(Number); return n / d; };
@@ -38,7 +40,8 @@ async function codeIdentity() {
 }
 
 async function ffmpegIdentity() {
-  return { binary: await fileSnapshot('Tools/bin/ffmpeg.exe'), version: (await run('ffmpeg', ['-version'])).stdout.split(/\r?\n/)[0] };
+  const runtime = selectRuntime(JSON.parse(readFileSync(new URL('../../versions.lock.json', import.meta.url), 'utf8')));
+  return { binary: await fileSnapshot(relative(mediaToolPath(ROOT, 'ffmpeg', runtime))), version: (await run('ffmpeg', ['-version'])).stdout.split(/\r?\n/)[0] };
 }
 
 export async function analyzeReframe({ source, startSec = 0, durationSec, sampleFps = 5, analysisMaxEdge = 640, minConfidence = 0.5, force = false, log = () => {} }) {

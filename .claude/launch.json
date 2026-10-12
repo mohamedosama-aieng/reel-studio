@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "reel-studio-editor",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/review-editor.mjs", "Projects/img-3305/edit.json", "--port", "0"],
+      "port": 4177,
+      "autoPort": true
+    }
+  ]
+}

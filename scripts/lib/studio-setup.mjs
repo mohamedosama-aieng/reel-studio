@@ -4,6 +4,7 @@ import {promises as fs, statSync} from 'node:fs';
 import path from 'node:path';
 import {resolveNpmCommand} from './npm-command.mjs';
 import {downloadVerified, sha256File} from './studio-download.mjs';
+import {browserToolPath, mediaToolPath, selectRuntime} from './platform-runtime.mjs';
 
 
 
@@ -67,11 +68,36 @@ export async function linkTree(source, target) {
   }
 }
 
-export function setupSteps(root, lock) {
+async function installMacBrowser(root, runtime, log) {
+  const archive = path.join(root, 'state', 'cache', 'downloads', `chrome-headless-shell-${runtime.id}.zip`);
+  await fs.mkdir(path.dirname(archive), {recursive: true});
+  await downloadVerified({url: runtime.browser.url, sha256: runtime.browser.archiveSha256, bytes: runtime.browser.bytes, target: archive});
+  const destination = path.join(root, BROWSER_HOMES.engine, 'chrome-headless-shell');
+  const staging = await fs.mkdtemp(path.join(root, 'state', 'tmp', 'chrome-'));
+  try {
+    log(`browser: extracting verified ${runtime.id} archive`);
+    await runProcess('unzip', ['-q', '-o', archive, '-d', staging], {cwd: root});
+    const [top] = await fs.readdir(staging);
+    if (!top || top.includes('/') || top.includes('\\')) throw new Error('Chrome archive has no safe top-level directory.');
+    const source = path.join(staging, top);
+    const folder = runtime.id.replace('darwin-', 'mac-');
+    const target = path.join(destination, folder, top);
+    await fs.rm(path.join(destination, folder), {recursive: true, force: true});
+    await fs.mkdir(path.dirname(target), {recursive: true});
+    await fs.rename(source, target);
+    await fs.chmod(browserToolPath(root, runtime, 'engine'), 0o755);
+  } finally {
+    await fs.rm(staging, {recursive: true, force: true});
+    await fs.rm(archive, {force: true});
+  }
+}
+
+export function setupSteps(root, lock, platform = process.platform, arch = process.arch) {
   const at = (relative) => path.join(root, ...relative.split('/'));
-  const ffmpegArchive = at(`state/cache/downloads/ffmpeg-${lock.ffmpeg.version}-full_build.7z`);
+  const runtime = selectRuntime(lock, platform, arch);
+  if (!runtime.supported) throw new Error(`Unsupported setup platform: ${platform} ${arch}.`);
   const engine = at('engine');
-  const browserOk = async (home) => (await sha256File(at(`${BROWSER_HOMES[home]}/${lock.browser.exe}`))) === lock.browser.exeSha256;
+  const browserOk = async (home) => (await sha256File(browserToolPath(root, runtime, home))) === runtime.browser.exeSha256;
   const browserDir = (home) => at(`${BROWSER_HOMES[home]}/chrome-headless-shell`);
   const writeOnce = (file, text) => fs.writeFile(file, text, {encoding: 'utf8', flag: 'wx'}).catch((error) => { if (error.code !== 'EEXIST') throw error; });
   return [
@@ -100,7 +126,7 @@ export function setupSteps(root, lock) {
     },
     {
       id: 'browser',
-      key: async () => `${lock.browser.version}:${lock.browser.exeSha256}`,
+      key: async () => `${lock.browser.version}:${runtime.browser.exeSha256}:${runtime.id}`,
       verify: async () => browserHomeProblem(root) === null && (await browserOk('engine')) && (await browserOk('root')),
       run: async (log) => {
         const problem = browserHomeProblem(root);
@@ -109,7 +135,10 @@ export function setupSteps(root, lock) {
           log('browser: reusing the verified copy in .remotion/');
           await linkTree(browserDir('root'), browserDir('engine'));
         }
-        if (!(await browserOk('engine'))) {
+        if (!(await browserOk('engine')) && runtime.id !== 'win32-x64') {
+          await installMacBrowser(root, runtime, log);
+        }
+        if (!(await browserOk('engine')) && runtime.id === 'win32-x64') {
           log('browser: Remotion ensureBrowser in engine/');
           await runProcess(process.execPath, ['-e', ENSURE_BROWSER], {cwd: engine});
         }
@@ -122,19 +151,18 @@ export function setupSteps(root, lock) {
     },
     {
       id: 'ffmpeg',
-      key: async () => lock.ffmpeg.sha256,
+      key: async () => hashOf(JSON.stringify({platform: runtime.id, ffmpeg: runtime.ffmpeg})),
       verify: async () => {
         const report = await fs.readFile(at('Tools/bin/ffmpeg-install.json'), 'utf8').then(JSON.parse).catch(() => null);
-        return report?.ok === true && report.archiveSha256 === lock.ffmpeg.sha256
-          && (await exists(at('Tools/bin/ffmpeg.exe'))) && (await exists(at('Tools/bin/ffprobe.exe')));
+        const reportMatches = runtime.id === 'win32-x64'
+          ? report?.archiveSha256 === runtime.ffmpeg.sha256
+          : report?.ffmpegSha256 === runtime.ffmpeg.ffmpeg.binarySha256 && report?.ffprobeSha256 === runtime.ffmpeg.ffprobe.binarySha256;
+        return report?.ok === true && report.platform === runtime.id && reportMatches
+          && (await exists(mediaToolPath(root, 'ffmpeg', runtime))) && (await exists(mediaToolPath(root, 'ffprobe', runtime)));
       },
       run: async (log) => {
-
-
-        await downloadVerified({url: lock.ffmpeg.url, sha256: lock.ffmpeg.sha256, bytes: lock.ffmpeg.bytes, target: ffmpegArchive});
-        log('ffmpeg: archive verified, extracting');
+        log(`ffmpeg: installing pinned ${runtime.ffmpeg.version} runtime for ${runtime.id}`);
         await runProcess(process.execPath, [at('scripts/install-ffmpeg.mjs')], {cwd: root});
-        await fs.rm(ffmpegArchive, {force: true});
       },
     },
     {

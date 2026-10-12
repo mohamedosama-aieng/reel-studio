@@ -9,9 +9,12 @@ import { createHash } from 'node:crypto';
 import { ROOT } from './project-paths.mjs';
 import { CACHE_DIR, fileKey } from './media.mjs';
 import { normalizeMixOptions, mixOutputPath, chooseMixSfxGain, parseMixStemStats, parseMixLoudness, assessMixDelivery, VOICE_SILENCE, buildVoiceChain, buildVoiceMeasureFilter, buildMixFilterGraph, parseSilenceSpans, silenceSpansFromAudioCache, selectFloorWindows, parseRmsLevelDb, estimateNoiseFloorDb, decideDenoise } from './mix-contract.mjs';
+import {mediaToolPath, selectRuntime} from './platform-runtime.mjs';
+import {readLock} from './studio-lock.mjs';
 
 const execute = promisify(execFile);
-const ffmpeg = path.join(ROOT, 'Tools/bin/ffmpeg.exe'), ffprobe = path.join(ROOT, 'Tools/bin/ffprobe.exe');
+const runtime = selectRuntime(await readLock(ROOT));
+const ffmpeg = mediaToolPath(ROOT, 'ffmpeg', runtime), ffprobe = mediaToolPath(ROOT, 'ffprobe', runtime);
 async function hashFile(file) { const hash = createHash('sha256'); for await (const chunk of fs.createReadStream(file)) hash.update(chunk); return hash.digest('hex'); }
 async function writeReport(file, value) { mixOutputPath(file); await fsp.mkdir(path.dirname(file), { recursive: true }); await fsp.writeFile(file, JSON.stringify(value, null, 2) + '\n', 'utf8'); }
 async function assertInput(file) {

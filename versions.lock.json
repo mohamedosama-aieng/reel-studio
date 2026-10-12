@@ -8,7 +8,21 @@
     "sha256": "bb819d6eb8f5bfda294bbc83a7e4ec6539da67c4233d54b0d655b9248b15e29d",
     "bytes": 35500968,
     "license": "MIT",
-    "homepage": "https://nodejs.org"
+    "homepage": "https://nodejs.org",
+    "platforms": {
+      "darwin-arm64": {
+        "version": "22.20.0",
+        "url": "https://nodejs.org/dist/v22.20.0/node-v22.20.0-darwin-arm64.tar.gz",
+        "sha256": "cc04a76a09f79290194c0646f48fec40354d88969bec467789a5d55dd097f949",
+        "bytes": 49838299
+      },
+      "darwin-x64": {
+        "version": "22.20.0",
+        "url": "https://nodejs.org/dist/v22.20.0/node-v22.20.0-darwin-x64.tar.gz",
+        "sha256": "00df9c5df3e4ec6848c26b70fb47bf96492f342f4bed6b17f12d99b3a45eeecc",
+        "bytes": 51010329
+      }
+    }
   },
   "git": {
     "version": "2.55.0.5",
@@ -24,7 +38,39 @@
     "sha256": "0fff188997a499b5382e0f66e845d4556c48c54f0113ebed4853d556dbdd7059",
     "bytes": 166721853,
     "license": "GPL-3.0",
-    "homepage": "https://www.gyan.dev/ffmpeg/builds/"
+    "homepage": "https://www.gyan.dev/ffmpeg/builds/",
+    "platforms": {
+      "darwin-arm64": {
+        "version": "6.0",
+        "ffmpeg": {
+          "url": "https://github.com/eugeneware/ffmpeg-static/releases/download/b6.1.1/ffmpeg-darwin-arm64.gz",
+          "sha256": "8923876afa8db5585022d7860ec7e589af192f441c56793971276d450ed3bbfa",
+          "bytes": 19246198,
+          "binarySha256": "a90e3db6a3fd35f6074b013f948b1aa45b31c6375489d39e572bea3f18336584"
+        },
+        "ffprobe": {
+          "url": "https://github.com/eugeneware/ffmpeg-static/releases/download/b6.1.1/ffprobe-darwin-arm64.gz",
+          "sha256": "d986a8ec7b030899fe66a8a288ed809a3543338705a3ce178cfb85869c5d80be",
+          "bytes": 19207077,
+          "binarySha256": "bb2db6f5d8cef919da12fbf592119a987202a8c060a886f3cab091f9cab90b64"
+        }
+      },
+      "darwin-x64": {
+        "version": "6.0",
+        "ffmpeg": {
+          "url": "https://github.com/eugeneware/ffmpeg-static/releases/download/b6.1.1/ffmpeg-darwin-x64.gz",
+          "sha256": "929b375c1182d956c51f7ac25e0b2b0411fb01f6f407aa15c9758efeb4242106",
+          "bytes": 25296431,
+          "binarySha256": "ebdddc936f61e14049a2d4b549a412b8a40deeff6540e58a9f2a2da9e6b18894"
+        },
+        "ffprobe": {
+          "url": "https://github.com/eugeneware/ffmpeg-static/releases/download/b6.1.1/ffprobe-darwin-x64.gz",
+          "sha256": "d4da574d6e2e197bd259b47d69cf262df9e312af24ad960444f6d806d3d4c186",
+          "bytes": 25239438,
+          "binarySha256": "fa3add0ce901f7241abe0dfc0155d958fc834aca3f8ce61f87cc712ae669c1e0"
+        }
+      }
+    }
   },
   "browser": {
     "version": "149.0.7790.0",
@@ -33,7 +79,23 @@
     "exe": "chrome-headless-shell/win64/chrome-headless-shell-win64/chrome-headless-shell.exe",
     "exeSha256": "ec76dc3e69ffab9daddf0bbe7bf0a9e0a034b2d086741a0ae2ef6358a597537b",
     "license": "BSD-3-Clause (Chromium) and bundled third-party licenses",
-    "homepage": "https://developer.chrome.com/blog/chrome-headless-shell"
+    "homepage": "https://developer.chrome.com/blog/chrome-headless-shell",
+    "platforms": {
+      "darwin-arm64": {
+        "url": "https://storage.googleapis.com/chrome-for-testing-public/149.0.7790.0/mac-arm64/chrome-headless-shell-mac-arm64.zip",
+        "archiveSha256": "17ef152eba8ffcfebc42e25ab295eb040d8e62455cff7dfcc735b652456d6899",
+        "bytes": 98080877,
+        "exe": "chrome-headless-shell/mac-arm64/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+        "exeSha256": "b469d05c698ccf9f4ae3dc43fb194fbdcf56f9da1fc46dcc19f2bf9fe2aa20b8"
+      },
+      "darwin-x64": {
+        "url": "https://storage.googleapis.com/chrome-for-testing-public/149.0.7790.0/mac-x64/chrome-headless-shell-mac-x64.zip",
+        "archiveSha256": "2597bf0940b54afbdfcb76519b5c8cf423cec49eea90ce1c4123456aca47a851",
+        "bytes": 103187459,
+        "exe": "chrome-headless-shell/mac-x64/chrome-headless-shell-mac-x64/chrome-headless-shell",
+        "exeSha256": "48271c038384ae56bca11f20cddf8ec4187ffe02b9d2837953165c9ce54eb747"
+      }
+    }
   },
   "models": [
     {

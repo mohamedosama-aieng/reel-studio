@@ -7,6 +7,8 @@ import { promisify } from 'node:util';
 import { randomUUID } from 'node:crypto';
 import { ROOT } from './media.mjs';
 import { WHISPER_RUNTIME_FILE, inspectWhisperRuntime, resolveWhisperModel } from './transcription-install.mjs';
+import {mediaToolPath, selectRuntime} from './platform-runtime.mjs';
+import {readLock} from './studio-lock.mjs';
 import {
   TRANSCRIPTION_SCHEMA, sha256File, transcriptionCacheKey, planTranscriptionChunks,
   mergeTranscriptionChunks, captionsToSrt, assertTranscriptionOutputPath,
@@ -141,8 +143,9 @@ export async function transcribeMedia(args, { onProgress = message => console.er
   let runtime;
   try { runtime = JSON.parse(await fsp.readFile(WHISPER_RUNTIME_FILE, 'utf8')); } catch { throw new Error('Modern whisper.cpp is not installed. Run node engine/tools/install-whisper.mjs --with-vad.'); }
   const toolsDir = path.join(ROOT, 'Tools', 'bin');
-  const ffmpeg = path.join(toolsDir, 'ffmpeg.exe'), ffprobe = path.join(toolsDir, 'ffprobe.exe');
-  if (!fs.existsSync(ffmpeg) || !fs.existsSync(ffprobe)) throw new Error('Project-local Tools/bin/ffmpeg.exe and ffprobe.exe are required.');
+  const runtimePlatform = selectRuntime(await readLock(ROOT));
+  const ffmpeg = mediaToolPath(ROOT, 'ffmpeg', runtimePlatform), ffprobe = mediaToolPath(ROOT, 'ffprobe', runtimePlatform);
+  if (!fs.existsSync(ffmpeg) || !fs.existsSync(ffprobe)) throw new Error('Project-local FFmpeg and FFprobe are required.');
   onProgress('Hashing source and model; checking the installed CPU runtime.');
   const [sourceSha256, model, actualRuntime, audioProbe, ffmpegSha256] = await Promise.all([
     sha256File(source), resolveWhisperModel(options.model), inspectWhisperRuntime(runtime.directory, { expectedBinaryFiles: runtime.binaryFiles }), probeAudio(ffprobe, source), sha256File(ffmpeg),

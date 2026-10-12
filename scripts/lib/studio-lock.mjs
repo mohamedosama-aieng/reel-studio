@@ -4,6 +4,7 @@ import path from 'node:path';
 export const LOCK_FILE = 'versions.lock.json';
 const SHA256 = /^[a-f0-9]{64}$/;
 const SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?$/;
+const RUNTIME_PLATFORMS = ['win32-x64', 'darwin-arm64', 'darwin-x64'];
 
 const text = (value) => typeof value === 'string' && value.trim().length > 0;
 const https = (value) => typeof value === 'string' && value.startsWith('https://');
@@ -39,6 +40,27 @@ export function validateLock(lock) {
   if (!relative(browser?.exe) || !browser.exe.startsWith('chrome-headless-shell/')) problems.push('browser.exe must be a relative path under chrome-headless-shell/');
   if (!SHA256.test(browser?.exeSha256 ?? '')) problems.push('browser.exeSha256 must be 64 lowercase hex characters');
   checkSource(problems, 'browser', browser);
+  for (const [platform, artifact] of Object.entries(browser?.platforms ?? {})) {
+    const name = `browser.platforms.${platform}`;
+    if (!RUNTIME_PLATFORMS.includes(platform) || platform === 'win32-x64') problems.push(`${name} is not a supported non-Windows platform entry`);
+    if (!https(artifact?.url)) problems.push(`${name}.url must be an https URL`);
+    if (!relative(artifact?.exe) || !artifact.exe.startsWith('chrome-headless-shell/')) problems.push(`${name}.exe must be a relative path under chrome-headless-shell/`);
+    if (!SHA256.test(artifact?.exeSha256 ?? '')) problems.push(`${name}.exeSha256 must be 64 lowercase hex characters`);
+    if (!SHA256.test(artifact?.archiveSha256 ?? '')) problems.push(`${name}.archiveSha256 must be 64 lowercase hex characters`);
+    if (!Number.isInteger(artifact?.bytes) || artifact.bytes <= 0) problems.push(`${name}.bytes must be a positive integer`);
+  }
+  for (const [platform, artifact] of Object.entries(lock.ffmpeg?.platforms ?? {})) {
+    const name = `ffmpeg.platforms.${platform}`;
+    if (!['darwin-arm64', 'darwin-x64'].includes(platform)) problems.push(`${name} is not a supported macOS platform entry`);
+    if (!text(artifact?.version)) problems.push(`${name}.version is missing`);
+    checkDownload(problems, `${name}.ffmpeg`, artifact?.ffmpeg);
+    checkDownload(problems, `${name}.ffprobe`, artifact?.ffprobe);
+  }
+  for (const [platform, artifact] of Object.entries(lock.node?.platforms ?? {})) {
+    const name = `node.platforms.${platform}`;
+    if (!['darwin-arm64', 'darwin-x64'].includes(platform)) problems.push(`${name} is not a supported macOS platform entry`);
+    checkDownload(problems, name, artifact);
+  }
   if (!Array.isArray(lock.models) || lock.models.length === 0) problems.push('models must be a non-empty array');
   for (const [index, model] of (Array.isArray(lock.models) ? lock.models : []).entries()) {
     const name = `models[${index}]`;

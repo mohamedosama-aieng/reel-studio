@@ -28,6 +28,7 @@
     "@remotion/tailwind-v4": "4.0.521",
     "@remotion/transitions": "4.0.521",
     "@remotion/zod-types": "4.0.521",
+    "lucide-react": "1.55.0",
     "lottie-web": "^5.13.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",

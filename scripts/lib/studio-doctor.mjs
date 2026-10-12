@@ -4,9 +4,10 @@ import path from 'node:path';
 import {isStoreEdition} from './studio-git.mjs';
 import {browserHomeProblem} from './studio-setup.mjs';
 import {readSetupState} from './studio-state.mjs';
+import {browserToolPath, mediaToolPath, selectRuntime} from './platform-runtime.mjs';
 
 export const CHECK_LABELS = Object.freeze({
-  platform: 'نوع الجهاز (لازم ويندوز 64-bit)',
+  platform: 'نوع الجهاز والمعالج المدعوم',
   node: 'Node',
   location: 'مكان فولدر الاستوديو (فيه package.json في فولدر فوقه)',
   setup: 'التجهيز',
@@ -38,14 +39,15 @@ export async function quickChecks(root, {lock, gitExe, readProfile, runsTool = t
   const state = await readSetupState(root);
   const misplaced = locationProblem(root);
   const store = isStoreEdition(root);
+  const runtime = selectRuntime(lock);
   const checks = {
-    platform: {ok: process.platform === 'win32' && process.arch === 'x64', actual: `${process.platform} ${process.arch}`},
+    platform: {ok: runtime.supported, actual: `${process.platform} ${process.arch}`},
     node: {ok: major > 22 || (major === 22 && minor >= 20), actual: process.versions.node},
     location: {ok: misplaced === null, error: misplaced},
     setup: {ok: state.status === 'done', actual: state.status},
     packages: {ok: await exists(at('engine/node_modules/remotion/package.json'))},
-    browser: {ok: (await exists(at(`engine/node_modules/.remotion/${lock.browser.exe}`))) && (await exists(at(`.remotion/${lock.browser.exe}`)))},
-    ffmpeg: {ok: runsTool(at('Tools/bin/ffmpeg.exe')) && runsTool(at('Tools/bin/ffprobe.exe'))},
+    browser: {ok: runtime.supported && (await exists(browserToolPath(root, runtime, 'engine'))) && (await exists(browserToolPath(root, runtime, 'root')))},
+    ffmpeg: {ok: runtime.supported && runsTool(mediaToolPath(root, 'ffmpeg', runtime)) && runsTool(mediaToolPath(root, 'ffprobe', runtime))},
     fonts: {ok: false, missing: []},
     models: {ok: false, missing: []},
     profile: {ok: false, error: null},

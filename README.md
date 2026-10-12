@@ -9,7 +9,7 @@
 <p align="center">
   <b>سجّل فكرتك، أو اختار مقاطع من حلقتك… وخلّي المساعد يجهّز ريلز على ذوقك.</b><br>
   مونتاج رأسي 9:16 · كابشن عربي · موشن يوضح الكلام<br>
-  Windows 64-bit · مع Claude Code أو Codex
+  Windows 64-bit أو macOS Intel وApple Silicon · مع Claude Code أو Codex
 </p>
 
 <p align="center">
@@ -34,7 +34,7 @@
 
 ## ابدأ في ٣ خطوات
 
-تحتاج **Windows 64-bit**، وClaude Code أو Codex يقدر يقرأ ملفاتك ويشغّل الأدوات. تحتاج إنترنت للتجهيز والتحديث واستخدام المساعد، ومساحة للأدوات وفيديوهاتك.
+تحتاج **Windows 64-bit أو macOS بمعالج Intel أو Apple Silicon**، وClaude Code أو Codex يقدر يقرأ ملفاتك ويشغّل الأدوات. تحتاج Node.js 22 أو أحدث، وإنترنت للتجهيز والتحديث واستخدام المساعد، ومساحة للأدوات وفيديوهاتك.
 
 1. افتح فولدر فاضي ومستقل للاستوديو في المساعد.
 2. انسخ الجملة دي وابعتها له:
@@ -293,7 +293,7 @@
 <details>
 <summary><b>ينفع على الموبايل أو Mac؟</b></summary>
 
-التجهيز الحالي مخصص لـWindows 64-bit. الموبايل وmacOS مش مدعومين حاليًا.
+Reel Studio شغال على Windows 64-bit وmacOS بمعالجات Intel أو Apple Silicon. الموبايل مش مدعوم.
 
 </details>
 

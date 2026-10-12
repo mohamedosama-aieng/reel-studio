@@ -8,7 +8,7 @@ Reel Studio's own code is released under the MIT License (see `LICENSE`). The to
 |---|---|---|---|
 | Node.js (portable, only when no suitable Node is installed) | 22.20.0 | MIT | https://nodejs.org |
 | Git for Windows MinGit (only when Git is missing) | 2.55.0.5 | GPL-2.0 | https://gitforwindows.org |
-| FFmpeg full build by gyan.dev | 8.1.2 | GPL-3.0 | https://www.gyan.dev/ffmpeg/builds/ |
+| FFmpeg full build by gyan.dev (Windows) / static build by eugeneware (macOS) | 8.1.2 / 6.0 | GPL-3.0 / LGPL-2.1-or-later | https://www.gyan.dev/ffmpeg/builds/ and https://github.com/eugeneware/ffmpeg-static |
 | Chrome Headless Shell (used by Remotion to render) | 149.0.7790.0 | BSD-3-Clause (Chromium) and bundled third-party licenses | https://developer.chrome.com/blog/chrome-headless-shell |
 | MediaPipe face detector model `blazeface-short-range-float16-v1` | - | Apache-2.0 | https://ai.google.dev/edge/mediapipe/solutions/vision/face_detector |
 | MediaPipe face detector model `blazeface-full-range-float16-v1` | - | Apache-2.0 | https://ai.google.dev/edge/mediapipe/solutions/vision/face_detector |
@@ -24,6 +24,7 @@ Downloaded from Google Fonts under the SIL Open Font License 1.1: Cairo, IBM Ple
 | Remotion (installed into engine/node_modules by npm ci) | Remotion License: free for individuals, non-profits and companies with up to 3 employees; larger companies need a Remotion company license | https://www.remotion.dev/license |
 | MediaPipe Tasks Vision (@mediapipe/tasks-vision) | Apache-2.0 | https://github.com/google-ai-edge/mediapipe |
 | whisper.cpp (downloaded on first transcription) | MIT | https://github.com/ggml-org/whisper.cpp |
+| CMake (downloaded locally when macOS builds Whisper) | BSD-3-Clause | https://cmake.org |
 | OpenAI Whisper model weights (downloaded on first transcription) | MIT | https://github.com/openai/whisper |
 | Other npm packages in engine/node_modules | Each package's own license file | https://www.npmjs.com |
 

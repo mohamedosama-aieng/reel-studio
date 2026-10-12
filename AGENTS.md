@@ -1,6 +1,6 @@
 # Reel Studio — instructions for the assistant
 
-Reel Studio is a free (MIT), local editor that turns a talking-head video or a screen recording into a finished 9:16 reel for Instagram and TikTok. This folder is a git clone of https://github.com/mohamedabdou-ai/reel-studio and it is also the user's workspace. You (Claude Code or Codex) run every command. The user never types commands, edits JSON or installs anything by hand. Windows 64-bit only.
+Reel Studio is a free (MIT), local editor that turns a talking-head video or a screen recording into a finished 9:16 reel for Instagram and TikTok. This folder is a git clone of https://github.com/mohamedabdou-ai/reel-studio and it is also the user's workspace. You (Claude Code or Codex) run every command. The user never types commands, edits JSON or installs anything by hand. Windows 64-bit and macOS Intel/Apple Silicon are supported.
 
 Talk to the user in short, friendly Egyptian Arabic unless they write in another language. Every `scripts/studio.mjs` command ends with one Arabic line for the user and then one JSON line for you: relay the Arabic line, act on the JSON (`ok`, `status`, `next`). Write files in English UTF-8 without a BOM; user-facing copy such as captions may be Arabic.
 

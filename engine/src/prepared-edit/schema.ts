@@ -82,6 +82,7 @@ import {FONT_CHOICES, CAPTION_GROUPING, CAPTION_PRESENTATION, WRITING_STYLES} fr
 export const editManifestSchema = z.object({
   version:z.literal(1), id:slug, purpose:z.enum(["test","delivery"]),
   style:styleSchema,
+  cleanOverlay:z.boolean().optional(),
   fontFamily:z.enum(FONT_CHOICES).optional(),
   writingStyle:z.enum(WRITING_STYLES).optional(),
   creator:creatorSchema.optional(),

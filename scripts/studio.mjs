@@ -11,6 +11,7 @@ import {checkForUpdate, pullUpdate, resolveGit} from './lib/studio-git.mjs';
 import {readLock} from './lib/studio-lock.mjs';
 import {runSetup, setupSteps} from './lib/studio-setup.mjs';
 import {LOG_FILE, STEP_IDS, describeSetup, readSetupState, workerAlive, writeSetupState} from './lib/studio-state.mjs';
+import {selectRuntime, unsupportedPlatformLine} from './lib/platform-runtime.mjs';
 
 const SELF = fileURLToPath(import.meta.url);
 const CHECK_LINES = {
@@ -75,6 +76,8 @@ const commands = {
   },
   async setup(rest) {
     const {values} = parseArgs({args: rest, options: {worker: {type: 'boolean'}, foreground: {type: 'boolean'}, steps: {type: 'string'}}, strict: true});
+    const runtime = selectRuntime(await readLock(ROOT));
+    if (!runtime.supported) return report(unsupportedPlatformLine(), {ok: false, reason: 'unsupported-platform', platform: process.platform, arch: process.arch}, 2);
     const stepIds = parseSteps(values.steps);
     if (values.worker) {
       const {line, json} = await runWorker(stepIds);

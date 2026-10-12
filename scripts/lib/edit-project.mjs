@@ -126,7 +126,7 @@ export async function prepareEditProject(manifestPath,{proxy=true,onProgress=()=
 
 
     const head=await buildPreparedHeadGuide(m,{log:onProgress});
-    const code=await Promise.all(['scripts/lib/edit-project.mjs','scripts/lib/prepared-media.mjs','engine/src/prepared-edit/schema.ts','engine/src/prepared-edit/timeline.ts','Tools/bin/ffmpeg.exe'].map(p=>fileSnapshot(p)));
+    const code=await Promise.all(['scripts/lib/edit-project.mjs','scripts/lib/prepared-media.mjs','engine/src/prepared-edit/schema.ts','engine/src/prepared-edit/timeline.ts', process.platform === 'win32' ? 'Tools/bin/ffmpeg.exe' : 'Tools/bin/ffmpeg'].map(p=>fileSnapshot(p)));
     const key=digest({version:1,source:m.source,segments:m.segments,code:code.map(x=>[x.path,x.sha256])});
     const publicSrc=`_prepared/${m.id}/${key}.mp4`;
     const plateFile=`engine/public/${publicSrc}`;

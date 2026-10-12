@@ -8,6 +8,7 @@ import { ROOT, writeJson } from './media.mjs';
 import { assertProjectOutput } from './project-paths.mjs';
 import { checkedPath, fileSnapshot } from './job-paths.mjs';
 import { mergeFaceDetections } from './face-merge.mjs';
+import {browserToolPath, selectRuntime} from './platform-runtime.mjs';
 
 
 const PINS = JSON.parse(readFileSync(new URL('./face-model-pins.json', import.meta.url), 'utf8'));
@@ -29,7 +30,7 @@ export const FACE_MODEL_FULL = Object.freeze({
   documentation: 'https://ai.google.dev/edge/mediapipe/solutions/vision/face_detector',
 });
 export const FACE_MODELS = Object.freeze([FACE_MODEL, FACE_MODEL_FULL]);
-const BROWSER = 'engine/node_modules/.remotion/chrome-headless-shell/win64/chrome-headless-shell-win64/chrome-headless-shell.exe';
+const BROWSER = browserToolPath(ROOT, selectRuntime(JSON.parse(readFileSync(new URL('../../versions.lock.json', import.meta.url), 'utf8'))));
 const rel = (file) => path.relative(ROOT, file).split(path.sep).join('/');
 
 async function installOne(model) {

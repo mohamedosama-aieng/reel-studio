@@ -8,7 +8,7 @@ import {ClipReveal} from "../core/mask";
 import {PipPlate} from "../core/device";
 import {fitToWidth, safeWidthFor} from "../core/type";
 import {EDITOR_FONT_ROLE} from "../core/editor-font-roles";
-import {CreativeFonts, getSceneGeometry} from "../creative-kit/primitives";
+import {CreativeFonts, FitText, getSceneGeometry} from "../creative-kit/primitives";
 import {ChapterCrossfade, ChapterThemeProvider, TypographyProvider, useSceneTheme} from "../creative-kit/chapter-theme";
 import {useBrandTheme} from "../creative-kit/brand-theme";
 import {IntroScene, ProofScene, ProcessScene, ComparisonScene, CommentGateScene, FollowScene} from "../creative-kit/scenes";
@@ -128,6 +128,12 @@ export const CaptionTrack:React.FC<{edit:EditManifest;compiled:ReturnType<typeof
   </div>;
 };
 
+const CleanOverlayStatement:React.FC<{scene:Extract<EditScene,{family:'statement'}>;theme:ReturnType<typeof useBrandTheme>}> = ({scene,theme})=>{
+  return <div style={{position:'absolute',left:42,top:1005,width:996,minHeight:178,boxSizing:'border-box',padding:'22px 30px',background:theme.accent,border:`3px solid ${theme.text}`,boxShadow:`7px 8px 0 ${theme.text}`,transform:'rotate(-1deg)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+    <FitText text={scene.data.title} theme={theme} role="title" width={930} height={132} size={54} min={30} lines={3} align="center" color={theme.onAccent??theme.text}/>
+  </div>;
+};
+
 
 
 
@@ -171,19 +177,24 @@ export const PreparedEdit:React.FC<PreparedEditProps> = (props)=>{
   const plate=props.plate;
   const geometry=getSceneGeometry(edit.style,"split");
   const aspect=plate.height/plate.width;
-  const state=footageFrameState(edit,frame,{aspect,canvasHeight:geometry.canvasHeight,probe});
+  const cleanOverlay=edit.cleanOverlay===true;
+  const stateEdit=cleanOverlay
+    ? {...edit,scenes:edit.scenes.map(scene=>({...scene,layout:'presenter' as const})),layoutTransitions:[]}
+    : edit;
+  const state=footageFrameState(stateEdit,frame,{aspect,canvasHeight:geometry.canvasHeight,probe});
   const seam=state.seam;
-  const captionCenterFor=(layout:SceneLayoutName)=>layout==='presenter'?PRESENTER_CAPTION_CENTER:edit.footage?(layout==='split'?seam:PRESENTER_CAPTION_CENTER):getSceneGeometry(edit.style,layout).captionCenter;
-  const pip=edit.footage?.pip;
+  const captionCenterFor=(layout:SceneLayoutName)=>cleanOverlay?PRESENTER_CAPTION_CENTER:layout==='presenter'?PRESENTER_CAPTION_CENTER:edit.footage?(layout==='split'?seam:PRESENTER_CAPTION_CENTER):getSceneGeometry(edit.style,layout).captionCenter;
+  const pip=cleanOverlay?undefined:edit.footage?.pip;
   const active=edit.scenes.find(s=>frame>=s.fromFrame&&frame<s.fromFrame+s.durationInFrames);
   return <SafeRoot {...props}><ChapterThemeProvider chapter={edit.brand??null}><TypographyProvider fontFamily={edit.fontFamily??null}><PreparedPlateProvider plate={plate}><CreativeFonts>
     <CanvasFill background={theme.background}/>
     {                                                                                  }
     <ContinuousWindowPlate src={plate.src} geo={state.geo} sourceAspect={aspect} visible={footageVisibility(edit,frame,props.__editorSkipHiddenVideo!==false)}/>
-    {edit.scenes.map((scene,index)=><Sequence key={scene.id} from={scene.fromFrame} durationInFrames={scene.durationInFrames}>
+    {cleanOverlay?null:edit.scenes.map((scene,index)=><Sequence key={scene.id} from={scene.fromFrame} durationInFrames={scene.durationInFrames}>
       <ScenePresentation edit={edit} index={index} geometry={state.geo} aspect={aspect} seam={seam} transition={state.transition}
         clipTop={state.clipTop} contentShift={state.contentShift} headBox={headBoxForScene(props.headGuide,scene.id)}/>
     </Sequence>)}
+    {cleanOverlay && active?.family==='statement'?<CleanOverlayStatement scene={active} theme={theme}/>:null}
     {
 
 
@@ -196,7 +207,7 @@ export const PreparedEdit:React.FC<PreparedEditProps> = (props)=>{
       {state.lower>0?<div style={{position:"absolute",inset:0,opacity:state.lower}}><CaptionTrack edit={edit} compiled={compiled} center={captionCenterFor(state.transition.from)}/></div>:null}
       {state.upper>0?<div style={{position:"absolute",inset:0,opacity:state.upper}}><CaptionTrack edit={edit} compiled={compiled} center={captionCenterFor(state.transition.to)}/></div>:null}
     </>:<CaptionTrack edit={edit} compiled={compiled} center={captionCenterFor(state.layout)}/>}
-    {(edit.transitions??[]).map((transition,index)=>{
+    {cleanOverlay?null:(edit.transitions??[]).map((transition,index)=>{
       if(!isOverlayKind(transition.kind)) return null;
       const at=transition.atFrame/edit.source.fps,dur=transition.durationInFrames/edit.source.fps;
       switch(transition.kind){
